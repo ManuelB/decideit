@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+<h:body>
+	<ui:composition template="common.xhtml">
+		<ui:define name="content">
+			<h1 class="text-center">#{decisionForm.decision.what}</h1>
+			<div class="text-center">
+				<a href="__SERVERURL__decision/#{decisionForm.decision.id.concat('/yes')}" class="btn btn-large btn-success">Yes</a>
+				<a href="__SERVERURL__decision/#{decisionForm.decision.id.concat('/no')}" class="btn btn-large btn-danger">No</a>
+			</div>
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

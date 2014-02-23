@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+<h:body>
+	<ui:composition template="common.xhtml">
+		<ui:define name="content">
+			<o:form styleClass="form-signin" includeViewParams="true">
+				<legend>#{decisionForm.decision.what}</legend>
+				<div class="status">
+					Was decided:
+					<c:choose>
+						<c:when test="${decisionForm.decision.status == DecisionStatus.Yes}">
+							<span class="has-success">Yes</span>
+						</c:when>
+						<c:when test="${decisionForm.decision.status == DecisionStatus.Yes}">
+							<span class="has-danger">No</span>
+						</c:when>
+						<c:therwise>
+							<span class="has-danger">Pending</span>
+						</c:therwise>
+					</c:choose>
+				</div>
+			</o:form>
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

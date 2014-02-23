@@ -1,0 +1,29 @@
+<pretty-config xmlns="http://ocpsoft.org/schema/rewrite-config-prettyfaces"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://ocpsoft.org/schema/rewrite-config-prettyfaces
+                      http://ocpsoft.org/xml/ns/prettyfaces/rewrite-config-prettyfaces.xsd">
+	<url-mapping id="index">
+		<pattern value="/" />
+		<view-id value="/index.jsf" />
+	</url-mapping>
+	
+	<url-mapping id="decision">
+		<pattern value="/decision/#{decisionId}" />
+		<view-id value="/decide.jsf" />
+	</url-mapping>
+	
+	<url-mapping parentId="decision" id="decision-answer">
+		<pattern value="/#{decisionForm.answer}" />
+		<view-id value="#{decisionForm.processAnswer}" />
+	</url-mapping>
+
+	<url-mapping id="status">
+		<pattern value="/status/#{decisionId}" />
+		<view-id value="/status.jsf" />
+	</url-mapping>
+	<url-mapping id="my-requested-decisions">
+		<pattern value="/my-requested-decisions/#{emailId}" />
+		<view-id value="/my-requested-decisions.jsf" />
+	</url-mapping>
+
+</pretty-config>

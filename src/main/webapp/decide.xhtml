@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions">
+<h:body>
+	<ui:composition template="common.xhtml">
+		<ui:define name="content">
+			<o:form styleClass="form-signin" includeViewParams="true">
+				<legend>#{decisionForm.decision.what}</legend>
+				<div class="text-center">
+					<h:commandButton styleClass="btn btn-large btn-success" value="Yes"
+						action="#{decisionForm.yes}" />
+					<h:commandButton styleClass="btn btn-large btn-danger" value="No"
+						action="#{decisionForm.no}" />
+				</div>
+			</o:form>
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>
