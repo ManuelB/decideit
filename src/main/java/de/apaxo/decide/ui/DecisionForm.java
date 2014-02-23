@@ -1,11 +1,11 @@
 package de.apaxo.decide.ui;
 
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Model;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
@@ -23,6 +23,9 @@ public class DecisionForm {
 
 	private String answer;
 
+	@ManagedProperty("#{param.fromEmailId}")
+	private String fromEmailId;
+
 	private static final Logger log = Logger.getLogger(DecisionForm.class
 			.getName());
 
@@ -38,22 +41,18 @@ public class DecisionForm {
 
 	}
 
-	public String processAnswer() {
+	public String processAnswer() throws MessagingException {
+		log.fine("Process answer");
 		if (answer != null) {
-			try {
-				if (answer.equals("yes")) {
-					return "/"+yes()+".jsf";
-				} else if (answer.equals("no")) {
-					return "/"+no()+".jsf";
-				}
-				return "/index.jsf";
-			} catch (MessagingException e) {
-				log.log(Level.WARNING, "Was not able to send answer mail.", e);
-				return "/error.jsf";
+			if (answer.equals("yes")) {
+				return "/" + yes() + ".jsf";
+			} else if (answer.equals("no")) {
+				return "/" + no() + ".jsf";
 			}
+			return "/index.jsf";
 		}
 		return "/decide.jsf";
-		
+
 	}
 
 	public Decision getDecision() {
@@ -65,6 +64,8 @@ public class DecisionForm {
 	}
 
 	public String submit() throws MessagingException {
+		log.fine("Process new decision: "
+				+ (decision != null ? decision.getWhat() : null));
 		decisionManager.processDecision(decision);
 		return "decision-send";
 	}
@@ -85,5 +86,13 @@ public class DecisionForm {
 
 	public void setAnswer(String answer) {
 		this.answer = answer;
+	}
+
+	public String getFromEmailId() {
+		return fromEmailId;
+	}
+
+	public void setFromEmailId(String fromEmailId) {
+		this.fromEmailId = fromEmailId;
 	}
 }

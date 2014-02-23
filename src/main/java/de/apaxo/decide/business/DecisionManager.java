@@ -76,68 +76,51 @@ public class DecisionManager {
 		log.fine("Sending decision: " + decision.getWhat() + " from "
 				+ decision.getFrom() + " to " + decision.getWho());
 		decision.setId(UUID.randomUUID().toString());
-		scheduleReminder(decision);
+		incrementAndScheduleReminder(decision);
 
 		em.persist(decision);
 
 		sendDecisionEmail(decision, decision.getFrom()
-				+ " wants you to take a decision");
+				+ " wants you to take a decision", false);
 
 	}
 
 	/**
-	 * Sends the decision email to the receiver.
+	 * Sends the decision email to the receiver (who) and the requester (from).
 	 * 
 	 * @param decision
 	 * @param subject
 	 * @throws MessagingException
 	 */
-	private void sendDecisionEmail(Decision decision, String subject)
-			throws MessagingException {
-		MimeMessage whoMail = new MimeMessage(mailSession);
-
+	private void sendDecisionEmail(Decision decision, String subject,
+			boolean reminder) throws MessagingException {
 		InternetAddress from = new InternetAddress();
 		from.setAddress(decision.getFrom());
 
-		// Try to find the id for the email, if not found create it
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Email2Id> cq = cb.createQuery(Email2Id.class);
-		Root<Email2Id> mail2IdRoot = cq.from(Email2Id.class);
-		cq.where(cb.equal(mail2IdRoot.get(Email2Id_.address),
-				decision.getFrom()));
-
-		cq.select(mail2IdRoot);
-		TypedQuery<Email2Id> q = em.createQuery(cq);
-		List<Email2Id> email2Id = q.getResultList();
-		if (email2Id.size() == 0) {
-			Email2Id newEmail2Id = new Email2Id();
-			newEmail2Id.setId(UUID.randomUUID().toString());
-			newEmail2Id.setAddress(decision.getFrom());
-			em.persist(newEmail2Id);
-		}
+		String fromEmailId = getEmailIdFromAddress(decision.getFrom());
 
 		InternetAddress who = new InternetAddress();
 		who.setAddress(decision.getWho());
-		whoMail.addFrom(new Address[] { from });
-		whoMail.addRecipient(javax.mail.Message.RecipientType.TO, who);
-		// whoMail.addRecipient(RecipientType.CC, from);
-
-		whoMail.setSubject(subject, "UTF-8");
-
-		MimeMultipart mp = new MimeMultipart("alternative");
-
-		BodyPart whoMailTextPart = new MimeBodyPart();
 
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("decisionId", decision.getId());
+		params.put("fromEmailId", fromEmailId);
 
-		String htmlContent = capture("/decide-email.xhtml", params);
+		String serverUrl = extractServerUrl();
 
+		sendMailTo(subject, who, params, serverUrl, "/decide-email.xhtml");
+
+		sendMailTo((reminder ? "Reminder" : "Decision") + " was send to "
+				+ decision.getWho(), from, params, serverUrl,
+				"/decide-email-to-from.xhtml");
+
+	}
+
+	private String extractServerUrl() {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		String url;
-		if(facesContext != null) {
-			url = facesContext.getExternalContext()
-				.getRequest().toString();
+		if (facesContext != null) {
+			url = facesContext.getExternalContext().getRequest().toString();
 		} else {
 			log.warning("Could not find facesContext. Setting url to: http://localhost:8080/decideit/");
 			url = "http://localhost:8080/decideit/";
@@ -150,39 +133,105 @@ public class DecisionManager {
 				.matcher(url);
 		everythingWithoutLastMatcher.matches();
 		String serverUrl = everythingWithoutLastMatcher.group(1);
+		return serverUrl;
+	}
+
+	/**
+	 * Send the given JSF page with the parameters to the given email address.
+	 * 
+	 * @param subject
+	 *            the subject for the email
+	 * @param to
+	 *            the to address for the person
+	 * @param params
+	 *            the params to pass to the JSF engine
+	 * @param serverUrl
+	 *            the server url
+	 * @param template
+	 *            the template to process for the JSF engine
+	 * @throws MessagingException
+	 */
+	private void sendMailTo(String subject, InternetAddress to,
+			Map<String, String> params, String serverUrl, String template)
+			throws MessagingException {
+		MimeMultipart mp;
+		String htmlContent;
+		String noHTMLString;
+		MimeMessage mail = new MimeMessage(mailSession);
+		mail.addFrom(new Address[] { new InternetAddress("decide-it@apaxo.de") });
+		mail.addRecipient(javax.mail.Message.RecipientType.TO, to);
+		// fromMail.addRecipient(RecipientType.CC, from);
+
+		mail.setSubject(subject, "UTF-8");
+
+		mp = new MimeMultipart("alternative");
+
+		BodyPart fromMailTextPart = new MimeBodyPart();
+
+		htmlContent = capture(template, params);
 
 		htmlContent = htmlContent.replaceAll("\"//", "\"http://");
 		htmlContent = htmlContent.replaceAll("__SERVERURL__", serverUrl);
 
 		// Fill the multi part with plain content
-		String noHTMLString = getPlainTextFromHtml(htmlContent);
+		noHTMLString = getPlainTextFromHtml(htmlContent);
 
-		whoMailTextPart.setContent(noHTMLString, "text/plain");
-		whoMailTextPart.setHeader("MIME-Version", "1.0");
-		whoMailTextPart.setHeader("Content-Type", "text/plain");
-		mp.addBodyPart(whoMailTextPart);
+		fromMailTextPart.setContent(noHTMLString, "text/plain");
+		fromMailTextPart.setHeader("MIME-Version", "1.0");
+		fromMailTextPart.setHeader("Content-Type", "text/plain");
+		mp.addBodyPart(fromMailTextPart);
 
-		// Create the whoMail part
-		BodyPart whoMailHtmlPart = new MimeBodyPart();
+		// Create the fromMail part
+		BodyPart fromMailHtmlPart = new MimeBodyPart();
 
 		// Fill the multi part with html content
-		whoMailHtmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
-		whoMailHtmlPart.setHeader("MIME-Version", "1.0");
-		whoMailHtmlPart.setHeader("Content-Type", "text/html; charset=UTF-8");
-		mp.addBodyPart(whoMailHtmlPart);
+		fromMailHtmlPart.setContent(htmlContent, "text/html; charset=UTF-8");
+		fromMailHtmlPart.setHeader("MIME-Version", "1.0");
+		fromMailHtmlPart.setHeader("Content-Type", "text/html; charset=UTF-8");
+		mp.addBodyPart(fromMailHtmlPart);
 
-		// set the multi part for the whoMail
-		whoMail.setContent(mp);
+		// set the multi part for the fromMail
+		mail.setContent(mp);
 
-		whoMail.setHeader("MIME-Version", "1.0");
-		whoMail.setHeader("Content-Type", mp.getContentType());
-		whoMail.setHeader("X-Mailer", "semRecSys Apaxo GmbH");
+		mail.setHeader("MIME-Version", "1.0");
+		mail.setHeader("Content-Type", mp.getContentType());
+		mail.setHeader("X-Mailer", "decide-it Apaxo GmbH");
 
-		whoMail.setSentDate(new Date());
+		mail.setSentDate(new Date());
 
-		whoMail.saveChanges();
+		mail.saveChanges();
 
-		Transport.send(whoMail);
+		Transport.send(mail);
+	}
+
+	/**
+	 * Encodes the address as an id. If there is already an id return id.
+	 * Otherwise create a new one.
+	 * 
+	 * @param address
+	 * @return
+	 */
+	private String getEmailIdFromAddress(String address) {
+		String id;
+		// Try to find the id for the email, if not found create it
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Email2Id> cq = cb.createQuery(Email2Id.class);
+		Root<Email2Id> mail2IdRoot = cq.from(Email2Id.class);
+		cq.where(cb.equal(mail2IdRoot.get(Email2Id_.address), address));
+
+		cq.select(mail2IdRoot);
+		TypedQuery<Email2Id> q = em.createQuery(cq);
+		List<Email2Id> email2Id = q.getResultList();
+		if (email2Id.size() == 0) {
+			Email2Id newEmail2Id = new Email2Id();
+			newEmail2Id.setId(UUID.randomUUID().toString());
+			newEmail2Id.setAddress(address);
+			em.persist(newEmail2Id);
+			id = newEmail2Id.getId();
+		} else {
+			id = email2Id.get(0).getId();
+		}
+		return id;
 	}
 
 	/**
@@ -190,15 +239,26 @@ public class DecisionManager {
 	 * 
 	 * @param decision
 	 */
-	private void scheduleReminder(Decision decision) {
+	private void incrementAndScheduleReminder(Decision decision) {
 		Calendar nextReminderDate = decision.getNextReminderDate();
 		// send next reminder tomorrow
 		nextReminderDate.add(Calendar.DAY_OF_YEAR, 1);
 		decision.setNextReminderDate(nextReminderDate);
+		
+		scheduleReminder(decision);
+	}
 
+	/**
+	 * Schedules a reminder for a decision.
+	 * 
+	 * @param decision
+	 */
+	public void scheduleReminder(Decision decision) {
+		Calendar nextReminderDate = decision.getNextReminderDate();
+		Date date = nextReminderDate.getTime();
 		TimerConfig timerConfig = new TimerConfig();
 		timerConfig.setInfo(decision.getId());
-		timerService.createSingleActionTimer(nextReminderDate.getTime(),
+		timerService.createSingleActionTimer(date,
 				timerConfig);
 	}
 
@@ -234,7 +294,7 @@ public class DecisionManager {
 
 		// setup a response catcher
 		FacesContext faces = FacesContext.getCurrentInstance();
-		if(faces == null) {
+		if (faces == null) {
 			log.warning("Faces could not be found returning empty string.");
 			return "";
 		}
@@ -291,8 +351,9 @@ public class DecisionManager {
 	 * Answer the decision with no.
 	 * 
 	 * @param decision
+	 * @throws MessagingException 
 	 */
-	public void yes(Decision decision) {
+	public void yes(Decision decision) throws MessagingException {
 		decide(decision, DecisionStatus.Yes);
 	}
 
@@ -300,8 +361,9 @@ public class DecisionManager {
 	 * Answer the decision with yes.
 	 * 
 	 * @param decision
+	 * @throws MessagingException 
 	 */
-	public void no(Decision decision) {
+	public void no(Decision decision) throws MessagingException {
 		decide(decision, DecisionStatus.No);
 	}
 
@@ -309,8 +371,9 @@ public class DecisionManager {
 	 * 
 	 * @param decision
 	 * @param status
+	 * @throws MessagingException 
 	 */
-	private void decide(Decision decision, DecisionStatus status) {
+	private void decide(Decision decision, DecisionStatus status) throws MessagingException {
 		Decision decision2 = em.find(Decision.class, decision.getId());
 		if (decision2 == null) {
 			throw new RuntimeException("Deicision was deleted.");
@@ -320,6 +383,14 @@ public class DecisionManager {
 		decision2.setStatus(status);
 		decision2.setDecisionDate(Calendar.getInstance());
 		decision2.setNextReminderDate(null);
+
+		InternetAddress to = new InternetAddress();
+		to.setAddress(decision2.getFrom());
+		sendMailTo(
+				decision2.getStatus() + " was decided for "
+						+ decision2.getWhat(), to,
+				new HashMap<String, String>(), extractServerUrl(),
+				"/decision-email-taken.jsf");
 	}
 
 	/**
@@ -352,10 +423,10 @@ public class DecisionManager {
 		Decision decision = em.find(Decision.class, timer.getInfo());
 		if (decision != null && decision.getNextReminderDate() != null
 				&& decision.getStatus() == DecisionStatus.Pending) {
-			scheduleReminder(decision);
+			incrementAndScheduleReminder(decision);
 			try {
 				sendDecisionEmail(decision, "Reminder: " + decision.getFrom()
-						+ " wants you to take a decision");
+						+ " wants you to take a decision", true);
 			} catch (MessagingException e) {
 				log.log(Level.WARNING,
 						"Could not send decision mail. Won't try again", e);

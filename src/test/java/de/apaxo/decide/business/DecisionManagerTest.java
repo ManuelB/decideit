@@ -86,9 +86,10 @@ public class DecisionManagerTest {
 	 * Test method for
 	 * {@link de.apaxo.decide.business.DecisionManager#yes(de.apaxo.decide.entities.Decision)}
 	 * .
+	 * @throws MessagingException 
 	 */
 	@Test
-	public void testYes() {
+	public void testYes() throws MessagingException {
 		DecisionManager decisionManager = getMockedDecisionManager();
 		Decision testDecision = getTestDecision();
 		when(
@@ -105,9 +106,10 @@ public class DecisionManagerTest {
 	 * Test method for
 	 * {@link de.apaxo.decide.business.DecisionManager#no(de.apaxo.decide.entities.Decision)}
 	 * .
+	 * @throws MessagingException 
 	 */
 	@Test
-	public void testNo() {
+	public void testNo() throws MessagingException {
 		DecisionManager decisionManager = getMockedDecisionManager();
 		Decision testDecision = getTestDecision();
 		when(

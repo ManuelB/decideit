@@ -14,14 +14,14 @@
 				<c:choose>
 					<c:when
 						test="${decisionForm.decision.status == DecisionStatus.Yes}">
-						<span class="has-success">Yes</span>
+						<span class="success">Yes</span>
 					</c:when>
 					<c:when
-						test="${decisionForm.decision.status == DecisionStatus.Yes}">
-						<span class="has-danger">No</span>
+						test="${decisionForm.decision.status == DecisionStatus.No}">
+						<span class="danger">No</span>
 					</c:when>
 					<c:therwise>
-						<span class="has-danger">Pending</span>
+						<span class="danger">Pending</span>
 					</c:therwise>
 				</c:choose>
 			</div>
