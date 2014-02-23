@@ -244,7 +244,6 @@ public class DecisionManager {
 		// send next reminder tomorrow
 		nextReminderDate.add(Calendar.DAY_OF_YEAR, 1);
 		decision.setNextReminderDate(nextReminderDate);
-		
 		scheduleReminder(decision);
 	}
 
@@ -376,7 +375,7 @@ public class DecisionManager {
 	private void decide(Decision decision, DecisionStatus status) throws MessagingException {
 		Decision decision2 = em.find(Decision.class, decision.getId());
 		if (decision2 == null) {
-			throw new RuntimeException("Deicision was deleted.");
+			throw new RuntimeException("Decision was deleted.");
 		} else if (decision2.getStatus() != DecisionStatus.Pending) {
 			throw new IllegalStateException("Decision was already taken.");
 		}

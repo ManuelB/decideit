@@ -6,12 +6,18 @@
 	xmlns:o="http://omnifaces.org/ui"
 	xmlns:of="http://omnifaces.org/functions" template="common.xhtml">
 	<ui:define name="content">
+		<f:metadata>
+			<f:viewParam name="fromEmailId" value="#{decisionForm.fromEmailId}" />
+		</f:metadata>
 		<br />
-		<h1 class="text-center">"#{decisionForm.decision.what}" was send to #{decisionForm.decision.who}</h1>
+		<h1 class="text-center">"#{decisionForm.decision.what}" was send
+			to #{decisionForm.decision.who}</h1>
 		<br />
 		<br />
 		<div class="text-center">
-			<a href="__SERVERURL__my-requested-decisions/#{decisionForm.fromEmailId}">All send decisions</a>
+			<a
+				href="__SERVERURL__my-requested-decisions/#{decisionForm.fromEmailId}">All
+				send decisions</a>
 		</div>
 		<br />
 		<br />

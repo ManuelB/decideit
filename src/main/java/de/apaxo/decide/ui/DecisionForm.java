@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Model;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
@@ -23,7 +22,6 @@ public class DecisionForm {
 
 	private String answer;
 
-	@ManagedProperty("#{param.fromEmailId}")
 	private String fromEmailId;
 
 	private static final Logger log = Logger.getLogger(DecisionForm.class

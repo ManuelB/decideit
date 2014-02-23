@@ -66,7 +66,7 @@ public class Bootstrap {
 			decision.setWho("boss@example.com");
 			decision.setFrom("blechschmidt@apaxo.de");
 			decision.setCreationDate(Calendar.getInstance());
-			decision.setNextReminderDate(Calendar.getInstance());
+			decision.setNextReminderDate(null);
 			decision.setStatus(DecisionStatus.Yes);
 			em.persist(decision);
 
@@ -76,7 +76,7 @@ public class Bootstrap {
 			decision.setWho("girlfriend@example.com");
 			decision.setFrom("blechschmidt@apaxo.de");
 			decision.setCreationDate(Calendar.getInstance());
-			decision.setNextReminderDate(Calendar.getInstance());
+			decision.setNextReminderDate(null);
 			decision.setStatus(DecisionStatus.No);
 			em.persist(decision);
 
@@ -86,7 +86,7 @@ public class Bootstrap {
 			decision.setWho("friend@example.com");
 			decision.setFrom("blechschmidt@apaxo.de");
 			decision.setCreationDate(Calendar.getInstance());
-			decision.setNextReminderDate(Calendar.getInstance());
+			decision.setNextReminderDate(null);
 			decision.setStatus(DecisionStatus.Pending);
 			em.persist(decision);
 
