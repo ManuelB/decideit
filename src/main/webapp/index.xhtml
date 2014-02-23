@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:ui="http://java.sun.com/jsf/facelets">
-<h:body>
-
-	<ui:composition template="common.xhtml">
-
-		<ui:define name="content">
-			<h:form styleClass="form-signin form-inline" id="decision-form">
-				<legend>What should be decided by whom?</legend>
-				<div class="form-group">
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions" template="common.xhtml">
+	<ui:define name="content">
+		<h:form id="decision-form">
+			<legend>What should be decided by whom?</legend>
+			<div class="row form-group">
+				<div class="col-xs-12">
 					<label for="decision-form:what" class="sr-only">What should
 						be decided?</label>
 					<h:inputText type="text" id="what"
 						value="#{decisionForm.decision.what}"
-						styleClass="#{component.valid ? 'form-control what' : 'form-control what has-error'}"
-						placeholder="What?" />
-					<br />
+						styleClass="form-control what input-lg col-xs-12"
+						placeholder="What? e.g. Do I get vacations in 3 weeks" />
 				</div>
-				<div class="form-group">
+			</div>
+			<br />
+			<div class="row form-group">
+				<div class="col-xs-6">
 					<label for="decision-form:who" class="sr-only">Who should
 						decide?</label>
 					<h:inputText type="text" id="who"
 						value="#{decisionForm.decision.who}"
-						styleClass="#{component.valid ? 'form-control who' : 'form-control who has-error'}"
-						placeholder="Who?" />
+						styleClass="form-control who input-lg"
+						placeholder="Who? e.g. boss@example.com" />
+				</div>
+				<div class="col-xs-6">
 					<label for="decision-form:from" class="sr-only">From whom
 						is the request?</label>
 					<h:inputText type="text" id="from"
 						value="#{decisionForm.decision.from}"
-						styleClass="#{component.valid ? 'form-control from' : 'form-control from has-error'}"
-						placeholder="From?" />
-					<br />
+						styleClass="col-xs-6 form-control from input-lg"
+						placeholder="From? e.g. john@example.com" />
 				</div>
-				<h:messages styleClass="alert alert-danger pull-left" />
-				<h:commandButton value="Send decision to person"
-					styleClass="btn btn-large btn-primary pull-right"
-					action="#{decisionForm.submit}"></h:commandButton>
-			</h:form>
-		</ui:define>
-	</ui:composition>
-</h:body>
-
-</html>
+			</div>
+			<h:messages styleClass="alert alert-danger pull-left" />
+			<br />
+			<h:commandButton value="Send decision to person"
+				styleClass="btn btn-large btn-primary pull-right"
+				action="#{decisionForm.submit}"></h:commandButton>
+		</h:form>
+	</ui:define>
+</ui:composition>
