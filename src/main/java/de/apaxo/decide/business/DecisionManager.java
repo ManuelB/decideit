@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +31,6 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -121,7 +119,7 @@ public class DecisionManager {
 		InternetAddress who = new InternetAddress();
 		who.setAddress(decision.getWho());
 		whoMail.addFrom(new Address[] { from });
-		whoMail.addRecipient(RecipientType.TO, who);
+		whoMail.addRecipient(javax.mail.Message.RecipientType.TO, who);
 		// whoMail.addRecipient(RecipientType.CC, from);
 
 		whoMail.setSubject(subject, "UTF-8");
@@ -135,8 +133,15 @@ public class DecisionManager {
 
 		String htmlContent = capture("/decide-email.xhtml", params);
 
-		String url = FacesContext.getCurrentInstance().getExternalContext()
+		FacesContext facesContext = FacesContext.getCurrentInstance();
+		String url;
+		if(facesContext != null) {
+			url = facesContext.getExternalContext()
 				.getRequest().toString();
+		} else {
+			log.warning("Could not find facesContext. Setting url to: http://localhost:8080/decideit/");
+			url = "http://localhost:8080/decideit/";
+		}
 		// get everything before the last /
 		// e.g. http://www.example.com/foo/bar.jsf
 		// matches 1. http://www.example.com/foo/
@@ -229,6 +234,10 @@ public class DecisionManager {
 
 		// setup a response catcher
 		FacesContext faces = FacesContext.getCurrentInstance();
+		if(faces == null) {
+			log.warning("Faces could not be found returning empty string.");
+			return "";
+		}
 		ExternalContext context = faces.getExternalContext();
 		ServletRequest request = (ServletRequest) faces.getExternalContext()
 				.getRequest();
@@ -242,7 +251,7 @@ public class DecisionManager {
 		if (params != null) {
 			oldAttributes = new HashMap<String, Object>(params.size() * 2); // with
 																			// buffer
-			for (String key : (Set<String>) params.keySet()) {
+			for (String key : params.keySet()) {
 				oldAttributes.put(key, request.getAttribute(key));
 				request.setAttribute(key, params.get(key));
 			}
@@ -267,7 +276,7 @@ public class DecisionManager {
 
 			// restore the request state
 			if (oldAttributes != null) {
-				for (String key : (Set<String>) oldAttributes.keySet()) {
+				for (String key : oldAttributes.keySet()) {
 					request.setAttribute(key, oldAttributes.get(key));
 				}
 			}

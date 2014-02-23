@@ -42,63 +42,80 @@ public class ResponseCatcher extends org.apache.catalina.connector.ResponseFacad
 	 * Return a print writer so it can be used by the servlet. The print writer
 	 * is used for text output.
 	 */
+	@Override
 	public PrintWriter getWriter() {
 		return writer;
 	}
 
+	@Override
 	public void flushBuffer() throws IOException {
 		writer.flush();
 	}
 
+	@Override
 	public boolean isCommitted() {
 		return false;
 	}
 
+	@Override
 	public boolean containsHeader(String arg0) {
 		return false;
 	}
 
 	/* wrapped methods */
+	@Override
 	public String encodeURL(String arg0) {
 		return response.encodeURL(arg0);
 	}
 
+	@Override
 	public String encodeRedirectURL(String arg0) {
 		return response.encodeRedirectURL(arg0);
 	}
 
+	@Override
+	@SuppressWarnings("deprecation")
 	public String encodeUrl(String arg0) {
 		return response.encodeUrl(arg0);
 	}
 
+	@Override
+	@SuppressWarnings("deprecation")
 	public String encodeRedirectUrl(String arg0) {
 		return response.encodeRedirectUrl(arg0);
 	}
 
+	@Override
 	public String getCharacterEncoding() {
 		return response.getCharacterEncoding();
 	}
 
+	@Override
 	public String getContentType() {
 		return response.getContentType();
 	}
 
+	@Override
 	public int getBufferSize() {
 		return response.getBufferSize();
 	}
 
+	@Override
 	public Locale getLocale() {
 		return response.getLocale();
 	}
 
+	@Override
 	public void sendError(int arg0, String arg1) throws IOException {
 		response.sendError(arg0, arg1);
 	}
 
+	@Override
 	public void sendError(int arg0) throws IOException {
 		response.sendError(arg0);
 	}
 
+	@Override
 	public void sendRedirect(String arg0) throws IOException {
 		response.sendRedirect(arg0);
 	}
@@ -174,6 +191,7 @@ public class ResponseCatcher extends org.apache.catalina.connector.ResponseFacad
 	}
 
 	/* unsupported methods */
+	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}

@@ -56,6 +56,7 @@ public class MyDecisions {
 			rowClasses = Joiner.on(",").join(FluentIterable.from(getDecisions())
 
 			.transform(new Function<Decision, String>() {
+				@Override
 				public String apply(Decision d) {
 					return d.getStatus() == DecisionStatus.Yes ? "success" : (d
 							.getStatus() == DecisionStatus.No ? "danger" : "active");
