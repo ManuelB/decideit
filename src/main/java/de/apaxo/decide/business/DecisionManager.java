@@ -254,11 +254,13 @@ public class DecisionManager {
 	 */
 	public void scheduleReminder(Decision decision) {
 		Calendar nextReminderDate = decision.getNextReminderDate();
-		Date date = nextReminderDate.getTime();
-		TimerConfig timerConfig = new TimerConfig();
-		timerConfig.setInfo(decision.getId());
-		timerService.createSingleActionTimer(date,
-				timerConfig);
+		if(nextReminderDate != null) {
+			Date date = nextReminderDate.getTime();
+			TimerConfig timerConfig = new TimerConfig();
+			timerConfig.setInfo(decision.getId());
+			timerService.createSingleActionTimer(date,
+					timerConfig);
+		}
 	}
 
 	/**

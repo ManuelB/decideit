@@ -11,6 +11,7 @@ import javax.mail.MessagingException;
 
 import de.apaxo.decide.business.DecisionManager;
 import de.apaxo.decide.entities.Decision;
+import de.apaxo.decide.entities.DecisionStatus;
 
 @Model
 public class DecisionForm {
@@ -28,7 +29,7 @@ public class DecisionForm {
 			.getName());
 
 	@PostConstruct
-	public void findDecisionById() {
+	public void findDecisionById() throws MessagingException {
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> paramMap = context.getExternalContext()
 				.getRequestParameterMap();
@@ -37,19 +38,29 @@ public class DecisionForm {
 			decision = decisionManager.get(decisionId);
 		}
 
+		if (answer != null && decision != null
+				&& decision.getStatus() == DecisionStatus.Pending) {
+			if (answer.equals("yes")) {
+				yes();
+			} else if (answer.equals("no")) {
+				no();
+			}
+		}
 	}
 
+	/**
+	 * Get the correct view for a processed answer
+	 * @return
+	 * @throws MessagingException
+	 */
 	public String processAnswer() throws MessagingException {
 		log.fine("Process answer");
-		if (answer != null) {
-			if (answer.equals("yes")) {
-				return "/" + yes() + ".jsf";
-			} else if (answer.equals("no")) {
-				return "/" + no() + ".jsf";
-			}
-			return "/index.jsf";
+		// this function is called twice don't know why
+		if (answer.equals("yes")) {
+			return "decision-yes";
+		} else {
+			return "decision-no";
 		}
-		return "/decide.jsf";
 
 	}
 
