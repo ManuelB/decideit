@@ -14,7 +14,8 @@
 	
 	<url-mapping parentId="decision" id="decision-answer">
 		<pattern value="/#{decisionForm.answer}" />
-		<view-id value="#{decisionForm.processAnswer}" />
+		<view-id value="/decision-already-taken.jsf" />
+		<action>#{decisionForm.processAnswer}</action>
 	</url-mapping>
 
 	<url-mapping id="status">

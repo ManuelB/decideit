@@ -387,6 +387,8 @@ public class DecisionManager {
 
 		InternetAddress to = new InternetAddress();
 		to.setAddress(decision2.getFrom());
+		// This creates problems when recreating the state
+		// it seams that the buffer gets full
 		sendMailTo(
 				decision2.getStatus() + " was decided for "
 						+ decision2.getWhat(), to,

@@ -29,7 +29,7 @@ public class DecisionForm {
 			.getName());
 
 	@PostConstruct
-	public void findDecisionById() throws MessagingException {
+	public void findDecisionById() {
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> paramMap = context.getExternalContext()
 				.getRequestParameterMap();
@@ -37,31 +37,21 @@ public class DecisionForm {
 		if (decisionId != null && !decisionId.equals("")) {
 			decision = decisionManager.get(decisionId);
 		}
+	}
 
+	public String processAnswer() throws MessagingException {
+		// this function is called twice don't know why
 		if (answer != null && decision != null
 				&& decision.getStatus() == DecisionStatus.Pending) {
 			if (answer.equals("yes")) {
 				yes();
+				return "/decision-yes.jsf";
 			} else if (answer.equals("no")) {
 				no();
+				return "/decision-no.jsf";
 			}
 		}
-	}
-
-	/**
-	 * Get the correct view for a processed answer
-	 * @return
-	 * @throws MessagingException
-	 */
-	public String processAnswer() throws MessagingException {
-		log.fine("Process answer");
-		// this function is called twice don't know why
-		if (answer.equals("yes")) {
-			return "decision-yes";
-		} else {
-			return "decision-no";
-		}
-
+		return null;
 	}
 
 	public Decision getDecision() {
