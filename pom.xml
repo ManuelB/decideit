@@ -3,7 +3,7 @@
 	<groupId>de.apaxo</groupId>
 	<artifactId>decideit</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>decideit Maven Webapp</name>
 	<url>https://decide.apaxo.de</url>
 	<properties>
@@ -91,9 +91,9 @@
 		<url>http://www.apaxo.de</url>
 	</organization>
 	<scm>
-		<url>scm:git:git://bitbucket.com/ManuelB/decideit</url>
-		<connection>scm:git:git://bitbucket.com/ManuelB/decideit</connection>
-		<developerConnection>scm:git:git://bitbucket.com/ManuelB/decideit</developerConnection>
+		<url>scm:git:https://manuel_blechschmidt@bitbucket.org/manuel_blechschmidt/decideit.git</url>
+		<connection>scm:git:https://manuel_blechschmidt@bitbucket.org/manuel_blechschmidt/decideit.git</connection>
+		<developerConnection>scm:git:https://manuel_blechschmidt@bitbucket.org/manuel_blechschmidt/decideit.git</developerConnection>
 	</scm>
 	<build>
 		<finalName>decideit</finalName>
