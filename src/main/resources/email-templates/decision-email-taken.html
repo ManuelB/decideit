@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-#include( "email-templates/header.html" )
-		<br />
-		<h1 class="text-center">${decisionForm.decision.what} was decided:</h1>
-		<br />
-		<br />
-		<div class="text-center">
-			#if($decisionForm.decision.status == "Yes")
-				<span class="success">Yes</span>
-			#elseif($decisionForm.decision.status == "No")
-				<span class="danger">No</span>
-			#else
-				<span class="danger">Pending</span>
-			#end
-		</div>
-		<br />
-		<br />
-		<br />
-#include( "email-templates/footer.html" )
+#parse( "email-templates/header.html" )
+<br />
+<h1 class="text-center">${decisionForm.decision.what} was decided:</h1>
+<br />
+<br />
+<div class="text-center">
+	#if($decisionForm.decision.status == "Yes")
+		<span class="success">Yes</span>
+	#elseif($decisionForm.decision.status == "No")
+		<span class="danger">No</span>
+	#else
+		<span class="danger">Pending</span>
+	#end
+</div>
+<br />
+<br />
+<br />
+#parse( "email-templates/footer.html" )

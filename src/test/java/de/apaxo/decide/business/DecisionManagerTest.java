@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.Timer;
@@ -167,7 +168,9 @@ public class DecisionManagerTest {
 	@Test
 	public void testParseTemplate() {
 		DecisionManager decisionManager = getMockedDecisionManager();
-		String output = decisionManager.capture("decide-email", new HashMap<String, Object>());
+		Map<String,Object> params = new HashMap<String, Object>();
+		params.put("title", "Test Title");
+		String output = decisionManager.capture("decide-email", params);
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
 				"<!DOCTYPE html>\n" + 
 				"<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
@@ -175,7 +178,7 @@ public class DecisionManagerTest {
 				"	<meta charset=\"utf-8\" />\n" + 
 				"	<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\n" + 
 				"	<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n" + 
-				"	<title>${title}</title>\n" + 
+				"	<title>Test Title</title>\n" + 
 				"\n" + 
 				"	<!-- Latest compiled and minified CSS -->\n" + 
 				"	<link\n" + 
@@ -190,20 +193,20 @@ public class DecisionManagerTest {
 				"	\n" + 
 				"</head>\n" + 
 				"<body>\n" + 
-				"	<div class=\"container-fluid\">	<br />\n" + 
-				"		<h1 class=\"text-center\">${decisionForm.decision.what}</h1>\n" + 
-				"		<br />\n" + 
-				"		<br />\n" + 
-				"		<div class=\"text-center\">\n" + 
-				"			<a\n" + 
-				"				href=\"${serverUrl}decision/${decisionForm.decision.id}/yes\"\n" + 
-				"				class=\"btn btn-large btn-success\">Yes</a> <a\n" + 
-				"				href=\"${serverUrl}decision/${decisionForm.decision.id}/no\"\n" + 
-				"				class=\"btn btn-large btn-danger\">No</a>\n" + 
-				"		</div>\n" + 
-				"		<br />\n" + 
-				"		<br />\n" + 
-				"		<br />\n" + 
+				"	<div class=\"container-fluid\"><br />\n" + 
+				"<h1 class=\"text-center\">${decisionForm.decision.what}</h1>\n" + 
+				"<br />\n" + 
+				"<br />\n" + 
+				"<div class=\"text-center\">\n" + 
+				"	<a\n" + 
+				"		href=\"${serverUrl}decision/${decisionForm.decision.id}/yes\"\n" + 
+				"		class=\"btn btn-large btn-success\">Yes</a> <a\n" + 
+				"		href=\"${serverUrl}decision/${decisionForm.decision.id}/no\"\n" + 
+				"		class=\"btn btn-large btn-danger\">No</a>\n" + 
+				"</div>\n" + 
+				"<br />\n" + 
+				"<br />\n" + 
+				"<br />\n" + 
 				"	</div>\n" + 
 				"</body>\n" + 
 				"</html>", output);

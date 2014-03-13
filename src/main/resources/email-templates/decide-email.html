@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-#include( "email-templates/header.html" )
-	<br />
-		<h1 class="text-center">${decisionForm.decision.what}</h1>
-		<br />
-		<br />
-		<div class="text-center">
-			<a
-				href="${serverUrl}decision/${decisionForm.decision.id}/yes"
-				class="btn btn-large btn-success">Yes</a> <a
-				href="${serverUrl}decision/${decisionForm.decision.id}/no"
-				class="btn btn-large btn-danger">No</a>
-		</div>
-		<br />
-		<br />
-		<br />
-#include( "email-templates/footer.html" )
+#parse( "email-templates/header.html" )
+<br />
+<h1 class="text-center">${decisionForm.decision.what}</h1>
+<br />
+<br />
+<div class="text-center">
+	<a
+		href="${serverUrl}decision/${decisionForm.decision.id}/yes"
+		class="btn btn-large btn-success">Yes</a> <a
+		href="${serverUrl}decision/${decisionForm.decision.id}/no"
+		class="btn btn-large btn-danger">No</a>
+</div>
+<br />
+<br />
+<br />
+#parse( "email-templates/footer.html" )

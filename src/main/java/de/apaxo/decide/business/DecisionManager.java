@@ -58,6 +58,9 @@ import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.apache.velocity.tools.generic.SortTool;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import de.apaxo.decide.entities.Decision;
 import de.apaxo.decide.entities.DecisionStatus;
@@ -366,7 +369,47 @@ public class DecisionManager {
 	 * @return
 	 */
 	private String getPlainTextFromHtml(String htmlContent) {
-		return Jsoup.parse(htmlContent).text();
+		String noHTMLString = "";
+        StringBuilder output = new StringBuilder();
+        try {
+
+            Document doc = Jsoup.parse(htmlContent);
+            Elements elements = doc.body().select("*");
+
+            int countImageLinks = 0;
+
+            for (Element el : elements) {
+                if (el.tag().getName().equals("a")) {
+                    String linkHref = el.attr("href");
+                    String linkText = el.text();
+                    Element img = el.select("img").first();
+                    // add spaces in front and after every parenthesis ()
+                    // for making sure that mail clients create
+                    // a correct link: SEMRECSYS-1066
+                    if (img != null) {
+                        String imgAlt = "\"" + img.attr("alt") + "\"";
+                        if (imgAlt.equals("\"\""))
+                            imgAlt = "";
+                        String imgSrc = img.attr("src");
+                        countImageLinks++;
+                        output.append("Image Link " + countImageLinks + " "
+                                + linkText + "\n" + imgAlt + "\n" + "( "
+                                + imgSrc + " )\n( " + linkHref + " )\n\n");
+                    } else {
+                        output.append(linkText + " ( " + linkHref + " )\n\n");
+                    }
+                } else {
+                    output.append(el.ownText() + "\n");
+                }
+            }
+        } catch (Exception ex) {
+            log.log(Level.WARNING,
+                    "An error occurred while converting html mime content '"
+                            + htmlContent + "' to text/plain output: ", ex);
+        }
+
+        noHTMLString = output.toString();
+        return noHTMLString;
 	}
 
 	/**
