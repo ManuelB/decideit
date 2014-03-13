@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+#include( "email-templates/header.html" )
+		<br />
+		<h1 class="text-center">"${decisionForm.decision.what}" was send
+			to ${decisionForm.decision.who}</h1>
+		<br />
+		<br />
+		<div class="text-center">
+			<a
+				href="${serverUrl}my-requested-decisions/#{decisionForm.fromEmailId}">All
+				send decisions</a>
+		</div>
+		<br />
+		<br />
+#include( "email-templates/footer.html" )

@@ -1,10 +1,13 @@
 package de.apaxo.decide.business;
 
-import java.io.IOException;
+import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -12,16 +15,13 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerConfig;
 import javax.ejb.TimerService;
-import javax.faces.application.FacesMessage;
-import javax.faces.application.ViewHandler;
-import javax.faces.component.UIViewRoot;
-import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.mail.Address;
 import javax.mail.BodyPart;
@@ -38,9 +38,25 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.MethodInvocationException;
+import org.apache.velocity.exception.ParseErrorException;
+import org.apache.velocity.exception.ResourceNotFoundException;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.JdkLogChute;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.apache.velocity.tools.ToolContext;
+import org.apache.velocity.tools.generic.AlternatorTool;
+import org.apache.velocity.tools.generic.ConversionTool;
+import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.DisplayTool;
+import org.apache.velocity.tools.generic.EscapeTool;
+import org.apache.velocity.tools.generic.MathTool;
+import org.apache.velocity.tools.generic.NumberTool;
+import org.apache.velocity.tools.generic.SortTool;
 import org.jsoup.Jsoup;
 
 import de.apaxo.decide.entities.Decision;
@@ -48,7 +64,6 @@ import de.apaxo.decide.entities.DecisionStatus;
 import de.apaxo.decide.entities.Decision_;
 import de.apaxo.decide.entities.Email2Id;
 import de.apaxo.decide.entities.Email2Id_;
-import de.apaxo.decide.ui.faces.ResponseCatcher;
 
 /**
  * This class implements the business logic to save a decision and send the
@@ -59,6 +74,8 @@ import de.apaxo.decide.ui.faces.ResponseCatcher;
  */
 @Stateless
 public class DecisionManager {
+
+	private VelocityEngine velocityEngine;
 
 	private static final Logger log = Logger.getLogger(DecisionManager.class
 			.getName());
@@ -72,6 +89,50 @@ public class DecisionManager {
 	@Resource(name = "Mail")
 	Session mailSession;
 
+	/**
+	 * Init the template engine
+	 */
+	@PostConstruct
+	public void initTemplatEngine() {
+		/*
+		 * create a new instance of the engine
+		 */
+
+		velocityEngine = new VelocityEngine();
+
+		// EasyFactoryConfiguration config = new EasyFactoryConfiguration();
+
+		/*
+		 * configure the engine. In this case, we are using ourselves as a
+		 * logger (see logging examples..)
+		 */
+
+		velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM,
+				new JdkLogChute());
+
+		/*
+		 * This will allow that macros which are already defined in an template
+		 * will replace existing ones.
+		 */
+		velocityEngine.setProperty(
+				RuntimeConstants.VM_PERM_ALLOW_INLINE_REPLACE_GLOBAL, true);
+
+		/**
+		 * Load templates from classpath
+		 */
+		velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER,
+				"classpath");
+		velocityEngine.setProperty("classpath.resource.loader.class",
+				ClasspathResourceLoader.class.getName());
+
+		velocityEngine.init();
+	}
+
+	/**
+	 * Process this decision by sending it to the receiver.
+	 * @param decision
+	 * @throws MessagingException
+	 */
 	public void processDecision(Decision decision) throws MessagingException {
 		log.fine("Sending decision: " + decision.getWhat() + " from "
 				+ decision.getFrom() + " to " + decision.getWho());
@@ -106,24 +167,35 @@ public class DecisionManager {
 		params.put("decisionId", decision.getId());
 		params.put("fromEmailId", fromEmailId);
 
-		String serverUrl = extractServerUrl();
-
-		sendMailTo(subject, who, params, serverUrl, "/decide-email.xhtml");
+		sendMailTo(subject, who, params, "decide-email");
 
 		sendMailTo((reminder ? "Reminder" : "Decision") + " was send to "
-				+ decision.getWho(), from, params, serverUrl,
-				"/decide-email-to-from.xhtml");
+				+ decision.getWho(), from, params, "decide-email-to-from");
 
 	}
 
+	/**
+	 * Extracts the server url from the given faces context.
+	 * 
+	 * @return
+	 */
 	private String extractServerUrl() {
-		FacesContext facesContext = FacesContext.getCurrentInstance();
+		FacesContext facesContext = getOrCreateCurrentFacesContext();
 		String url;
-		if (facesContext != null) {
+		if (facesContext != null
+				&& facesContext.getExternalContext().getRequest() != null) {
 			url = facesContext.getExternalContext().getRequest().toString();
 		} else {
-			log.warning("Could not find facesContext. Setting url to: http://localhost:8080/decideit/");
-			url = "http://localhost:8080/decideit/";
+
+			try {
+				String hostname = InetAddress.getLocalHost().getHostName();
+				log.warning("Could not find facesContext. Setting url to: http://"
+						+ hostname + ":8080/decideit/");
+				url = "http://" + hostname + ":8080/decideit/";
+			} catch (UnknownHostException e) {
+				log.warning("Could not find facesContext. Setting url to: http://localhost:8080/decideit/");
+				url = "http://localhost:8080/decideit/";
+			}
 		}
 		// get everything before the last /
 		// e.g. http://www.example.com/foo/bar.jsf
@@ -137,6 +209,16 @@ public class DecisionManager {
 	}
 
 	/**
+	 * Return or creates a faces contest
+	 * 
+	 * @return
+	 */
+	private FacesContext getOrCreateCurrentFacesContext() {
+		FacesContext context = FacesContext.getCurrentInstance();
+		return context;
+	}
+
+	/**
 	 * Send the given JSF page with the parameters to the given email address.
 	 * 
 	 * @param subject
@@ -145,15 +227,15 @@ public class DecisionManager {
 	 *            the to address for the person
 	 * @param params
 	 *            the params to pass to the JSF engine
-	 * @param serverUrl
-	 *            the server url
 	 * @param template
 	 *            the template to process for the JSF engine
 	 * @throws MessagingException
 	 */
 	private void sendMailTo(String subject, InternetAddress to,
-			Map<String, String> params, String serverUrl, String template)
+			Map<String, String> params, String template)
 			throws MessagingException {
+
+		params.put("serverUrl", extractServerUrl());
 		MimeMultipart mp;
 		String htmlContent;
 		String noHTMLString;
@@ -171,7 +253,6 @@ public class DecisionManager {
 		htmlContent = capture(template, params);
 
 		htmlContent = htmlContent.replaceAll("\"//", "\"http://");
-		htmlContent = htmlContent.replaceAll("__SERVERURL__", serverUrl);
 
 		// Fill the multi part with plain content
 		noHTMLString = getPlainTextFromHtml(htmlContent);
@@ -254,12 +335,11 @@ public class DecisionManager {
 	 */
 	public void scheduleReminder(Decision decision) {
 		Calendar nextReminderDate = decision.getNextReminderDate();
-		if(nextReminderDate != null) {
+		if (nextReminderDate != null) {
 			Date date = nextReminderDate.getTime();
 			TimerConfig timerConfig = new TimerConfig();
 			timerConfig.setInfo(decision.getId());
-			timerService.createSingleActionTimer(date,
-					timerConfig);
+			timerService.createSingleActionTimer(date, timerConfig);
 		}
 	}
 
@@ -285,74 +365,166 @@ public class DecisionManager {
 	}
 
 	/**
+	 * Parses a template with the volicity template engine.
+	 * 
+	 * @param template
+	 * @param params
+	 * @return
+	 */
+	String capture(String templateName, Map<String, String> params) {
+		String errorMessage = "";
+		try {
+			VelocityContext context = new VelocityContext(params);
+			addVelocityTools(context);
+			StringWriter out = new StringWriter();
+			log.fine("Generating filling template with Object: " + params);
+			Template template = velocityEngine.getTemplate("email-templates/"
+					+ templateName + ".html");
+			template.merge(context, out);
+			return out.getBuffer().toString();
+		} catch (ResourceNotFoundException rnfe) {
+			// A referenced resource could not be loaded
+			log.log(Level.WARNING,
+					"Template Error: A referenced resource could not be loaded",
+					rnfe);
+			errorMessage = rnfe.getLocalizedMessage();
+		} catch (ParseErrorException pee) {
+			// syntax error: problem parsing the template
+			log.log(Level.WARNING,
+					"syntax error: problem parsing the template", pee);
+			errorMessage = pee.getLocalizedMessage();
+		} catch (MethodInvocationException mie) {
+			// something invoked in the template
+			// threw an exception
+			log.log(Level.WARNING,
+					"something invoked in the template threw an exception", mie);
+			errorMessage = mie.getLocalizedMessage();
+		} catch (Exception e) {
+			log.log(Level.WARNING, "Error during Template parsing", e);
+			errorMessage = e.getLocalizedMessage();
+		}
+		return "Error parsing Template [" + errorMessage
+				+ "]. Call the administrator to see the log file.";
+	}
+
+	/**
+	 * This function adds the following tools to the template context: number -
+	 * http
+	 * ://velocity.apache.org/tools/releases/2.0/javadoc/org/apache/velocity/
+	 * tools/generic/NumberTool.html convert -
+	 * http://velocity.apache.org/tools/releases
+	 * /2.0/javadoc/org/apache/velocity/tools/generic/ConversionTool.html date -
+	 * http
+	 * ://velocity.apache.org/tools/releases/2.0/javadoc/org/apache/velocity/
+	 * tools/generic/DateTool.html display -
+	 * http://velocity.apache.org/tools/releases
+	 * /2.0/javadoc/org/apache/velocity/tools/generic/DisplayTool.html esc -
+	 * http
+	 * ://velocity.apache.org/tools/releases/2.0/javadoc/org/apache/velocity/
+	 * tools/generic/EscapeTool.html sorter -
+	 * http://velocity.apache.org/tools/releases
+	 * /2.0/javadoc/org/apache/velocity/tools/generic/SortTool.html
+	 * 
+	 * @param context
+	 */
+	private void addVelocityTools(VelocityContext context) {
+
+		HashMap<String, Object> localeMap = new HashMap<String, Object>();
+		localeMap.put(ToolContext.LOCALE_KEY, context.get("locale"));
+
+		// Locale dependend:
+		// * ConversionTool
+		// * DisplayTool
+		// * BrowserTool
+		// * DateTool
+		// * MathTool
+		// * NumberTool
+		// * ResourceTool
+		NumberTool numberTool = new NumberTool();
+		context.put("number", numberTool);
+		numberTool.configure(localeMap);
+
+		ConversionTool conversionTool = new ConversionTool();
+		context.put("convert", conversionTool);
+		conversionTool.configure(localeMap);
+
+		DateTool dateTool = new DateTool();
+		context.put("date", dateTool);
+		dateTool.configure(localeMap);
+
+		MathTool math = new MathTool();
+		context.put("math", math);
+		math.configure(localeMap);
+
+		DisplayTool displayTool = new DisplayTool();
+		context.put("display", displayTool);
+		displayTool.configure(localeMap);
+
+		EscapeTool escapeTool = new EscapeTool();
+		context.put("esc", escapeTool);
+		escapeTool.configure(localeMap);
+
+		SortTool sortTool = new SortTool();
+		context.put("sorter", sortTool);
+
+		AlternatorTool alternatorTool = new AlternatorTool();
+		context.put("alternator", alternatorTool);
+
+		context.put("en_US", Locale.US);
+
+	}
+
+	/**
+	 * TODO: This function only works when the request was initiated by a web
+	 * request but we need a function that also runs in unit tests and scheduled
+	 * executions
+	 * 
 	 * Render a template in memory and return the content as a string. The
 	 * request parameter 'emailClient' is set to true during rendering. This
 	 * method relies on a FacesContext for Facelets templating so it only works
 	 * when the app is deployed.
 	 * http://www.ninthavenue.com.au/how-to-create-email-from-jsf-templates
+	 * 
+	 * private String capture(String template, Map<String, String> params) {
+	 * 
+	 * // setup a response catcher FacesContext faces =
+	 * getOrCreateCurrentFacesContext(); if (faces == null) {
+	 * log.warning("Faces could not be found returning empty string."); return
+	 * ""; } ExternalContext context = faces.getExternalContext();
+	 * ServletRequest request = (ServletRequest) faces.getExternalContext()
+	 * .getRequest(); HttpServletResponse response = (HttpServletResponse)
+	 * context .getResponse(); ResponseCatcher catcher = new
+	 * ResponseCatcher(response);
+	 * 
+	 * // hack the request state UIViewRoot oldView = faces.getViewRoot();
+	 * Map<String, Object> oldAttributes = null; if (params != null) {
+	 * oldAttributes = new HashMap<String, Object>(params.size() * 2); // with
+	 * // buffer for (String key : params.keySet()) { oldAttributes.put(key,
+	 * request.getAttribute(key)); request.setAttribute(key, params.get(key)); }
+	 * } if (request != null) { request.setAttribute("emailClient", true); }
+	 * context.setResponse(catcher);
+	 * 
+	 * try { // build a JSF view for the template and render it ViewHandler
+	 * views = faces.getApplication().getViewHandler(); UIViewRoot view =
+	 * views.createView(faces, template); faces.setViewRoot(view);
+	 * views.getViewDeclarationLanguage(faces, template).buildView(faces, view);
+	 * views.renderView(faces, view); } catch (IOException ioe) { String msg =
+	 * "Failed to render " + template; faces.addMessage(null, new FacesMessage(
+	 * FacesMessage.SEVERITY_ERROR, msg, msg)); return null; } finally {
+	 * 
+	 * // restore the request state if (oldAttributes != null) { for (String key
+	 * : oldAttributes.keySet()) { request.setAttribute(key,
+	 * oldAttributes.get(key)); } } if (request != null) {
+	 * request.setAttribute("emailClient", null); }
+	 * context.setResponse(response); faces.setViewRoot(oldView); } return
+	 * catcher.toString(); }
 	 */
-	public static String capture(String template, Map<String, String> params) {
-
-		// setup a response catcher
-		FacesContext faces = FacesContext.getCurrentInstance();
-		if (faces == null) {
-			log.warning("Faces could not be found returning empty string.");
-			return "";
-		}
-		ExternalContext context = faces.getExternalContext();
-		ServletRequest request = (ServletRequest) faces.getExternalContext()
-				.getRequest();
-		HttpServletResponse response = (HttpServletResponse) context
-				.getResponse();
-		ResponseCatcher catcher = new ResponseCatcher(response);
-
-		// hack the request state
-		UIViewRoot oldView = faces.getViewRoot();
-		Map<String, Object> oldAttributes = null;
-		if (params != null) {
-			oldAttributes = new HashMap<String, Object>(params.size() * 2); // with
-																			// buffer
-			for (String key : params.keySet()) {
-				oldAttributes.put(key, request.getAttribute(key));
-				request.setAttribute(key, params.get(key));
-			}
-		}
-		request.setAttribute("emailClient", true);
-		context.setResponse(catcher);
-
-		try {
-			// build a JSF view for the template and render it
-			ViewHandler views = faces.getApplication().getViewHandler();
-			UIViewRoot view = views.createView(faces, template);
-			faces.setViewRoot(view);
-			views.getViewDeclarationLanguage(faces, template).buildView(faces,
-					view);
-			views.renderView(faces, view);
-		} catch (IOException ioe) {
-			String msg = "Failed to render " + template;
-			faces.addMessage(null, new FacesMessage(
-					FacesMessage.SEVERITY_ERROR, msg, msg));
-			return null;
-		} finally {
-
-			// restore the request state
-			if (oldAttributes != null) {
-				for (String key : oldAttributes.keySet()) {
-					request.setAttribute(key, oldAttributes.get(key));
-				}
-			}
-			request.setAttribute("emailClient", null);
-			context.setResponse(response);
-			faces.setViewRoot(oldView);
-		}
-		return catcher.toString();
-	}
 
 	/**
 	 * Answer the decision with no.
 	 * 
 	 * @param decision
-	 * @throws MessagingException 
+	 * @throws MessagingException
 	 */
 	public void yes(Decision decision) throws MessagingException {
 		decide(decision, DecisionStatus.Yes);
@@ -362,7 +534,7 @@ public class DecisionManager {
 	 * Answer the decision with yes.
 	 * 
 	 * @param decision
-	 * @throws MessagingException 
+	 * @throws MessagingException
 	 */
 	public void no(Decision decision) throws MessagingException {
 		decide(decision, DecisionStatus.No);
@@ -372,9 +544,10 @@ public class DecisionManager {
 	 * 
 	 * @param decision
 	 * @param status
-	 * @throws MessagingException 
+	 * @throws MessagingException
 	 */
-	private void decide(Decision decision, DecisionStatus status) throws MessagingException {
+	private void decide(Decision decision, DecisionStatus status)
+			throws MessagingException {
 		Decision decision2 = em.find(Decision.class, decision.getId());
 		if (decision2 == null) {
 			throw new RuntimeException("Decision was deleted.");
@@ -392,8 +565,7 @@ public class DecisionManager {
 		sendMailTo(
 				decision2.getStatus() + " was decided for "
 						+ decision2.getWhat(), to,
-				new HashMap<String, String>(), extractServerUrl(),
-				"/decision-email-taken.jsf");
+				new HashMap<String, String>(), "decision-email-taken");
 	}
 
 	/**
