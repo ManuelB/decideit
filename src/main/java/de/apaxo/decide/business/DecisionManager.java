@@ -64,6 +64,7 @@ import de.apaxo.decide.entities.DecisionStatus;
 import de.apaxo.decide.entities.Decision_;
 import de.apaxo.decide.entities.Email2Id;
 import de.apaxo.decide.entities.Email2Id_;
+import de.apaxo.decide.ui.DecisionForm;
 
 /**
  * This class implements the business logic to save a decision and send the
@@ -163,9 +164,11 @@ public class DecisionManager {
 		InternetAddress who = new InternetAddress();
 		who.setAddress(decision.getWho());
 
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("decisionId", decision.getId());
-		params.put("fromEmailId", fromEmailId);
+		Map<String, Object> params = new HashMap<String, Object>();
+		DecisionForm decisionForm = new DecisionForm();
+		decisionForm.setDecision(decision);
+		decisionForm.setFromEmailId(fromEmailId);
+		params.put("decisionForm", decisionForm);
 
 		sendMailTo(subject, who, params, "decide-email");
 
@@ -232,9 +235,11 @@ public class DecisionManager {
 	 * @throws MessagingException
 	 */
 	private void sendMailTo(String subject, InternetAddress to,
-			Map<String, String> params, String template)
+			Map<String, Object> params, String template)
 			throws MessagingException {
-
+		if(!params.containsKey("title")) {
+			params.put("title", subject);
+		}
 		params.put("serverUrl", extractServerUrl());
 		MimeMultipart mp;
 		String htmlContent;
@@ -371,7 +376,7 @@ public class DecisionManager {
 	 * @param params
 	 * @return
 	 */
-	String capture(String templateName, Map<String, String> params) {
+	String capture(String templateName, Map<String, Object> params) {
 		String errorMessage = "";
 		try {
 			VelocityContext context = new VelocityContext(params);
@@ -548,24 +553,29 @@ public class DecisionManager {
 	 */
 	private void decide(Decision decision, DecisionStatus status)
 			throws MessagingException {
-		Decision decision2 = em.find(Decision.class, decision.getId());
-		if (decision2 == null) {
+		Decision persistedDecision = em.find(Decision.class, decision.getId());
+		if (persistedDecision == null) {
 			throw new RuntimeException("Decision was deleted.");
-		} else if (decision2.getStatus() != DecisionStatus.Pending) {
+		} else if (persistedDecision.getStatus() != DecisionStatus.Pending) {
 			throw new IllegalStateException("Decision was already taken.");
 		}
-		decision2.setStatus(status);
-		decision2.setDecisionDate(Calendar.getInstance());
-		decision2.setNextReminderDate(null);
+		persistedDecision.setStatus(status);
+		persistedDecision.setDecisionDate(Calendar.getInstance());
+		persistedDecision.setNextReminderDate(null);
 
+		Map<String,Object> params = new HashMap<String, Object>();
+		DecisionForm decisionForm = new DecisionForm();
+		decisionForm.setDecision(persistedDecision);
+		params.put("decisionForm", decisionForm);
+		
 		InternetAddress to = new InternetAddress();
-		to.setAddress(decision2.getFrom());
+		to.setAddress(persistedDecision.getFrom());
 		// This creates problems when recreating the state
 		// it seams that the buffer gets full
 		sendMailTo(
-				decision2.getStatus() + " was decided for "
-						+ decision2.getWhat(), to,
-				new HashMap<String, String>(), "decision-email-taken");
+				persistedDecision.getStatus() + " was decided for "
+						+ persistedDecision.getWhat(), to,
+				params, "decision-email-taken");
 	}
 
 	/**
