@@ -35,7 +35,7 @@ public @interface Email {
 
 		@Override
 		public boolean isValid(String arg0, ConstraintValidatorContext arg1) {
-			return arg0.matches("^.*@.*\\..*$");
+			return arg0.matches("^[a-zA-Z0-9-.]+@[a-zA-Z0-9-.]+\\.[a-zA-Z0-9]+$");
 		}
 
 	}

@@ -166,6 +166,12 @@ public class DecisionManagerTest {
 	}
 	
 	@Test
+	public void testTestConfig() {
+		DecisionManager decisionManager = getMockedDecisionManager();
+		assertEquals("https://decide-it.apaxo.de/decideit/", decisionManager.config.getString("webAppUrl"));
+	}
+	
+	@Test
 	public void testParseTemplate() {
 		DecisionManager decisionManager = getMockedDecisionManager();
 		Map<String,Object> params = new HashMap<String, Object>();
@@ -224,7 +230,7 @@ public class DecisionManagerTest {
 						mock(Predicate.class));
 				mailSession = Session.getDefaultInstance(new Properties());
 				timerService = mock(TimerService.class);
-				initTemplatEngine();
+				init();
 			}
 		};
 	}

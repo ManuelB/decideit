@@ -39,6 +39,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
@@ -93,11 +96,21 @@ public class DecisionManager {
 	@Resource(name = "Mail")
 	Session mailSession;
 
+	PropertiesConfiguration config;
+
 	/**
-	 * Init the template engine
+	 * Init the template engine and configuration
 	 */
 	@PostConstruct
-	public void initTemplatEngine() {
+	public void init() {
+		try {
+			config = new PropertiesConfiguration(Thread.currentThread()
+					.getContextClassLoader()
+					.getResource("decide-it.properties"));
+			config.setReloadingStrategy(new FileChangedReloadingStrategy());
+		} catch (ConfigurationException e) {
+			log.log(Level.WARNING, "Could not load decide-it.properties", e);
+		}
 		/*
 		 * create a new instance of the engine
 		 */
@@ -134,6 +147,7 @@ public class DecisionManager {
 
 	/**
 	 * Process this decision by sending it to the receiver.
+	 * 
 	 * @param decision
 	 * @throws MessagingException
 	 */
@@ -187,20 +201,24 @@ public class DecisionManager {
 	 */
 	private String extractServerUrl() {
 		FacesContext facesContext = getOrCreateCurrentFacesContext();
-		String url;
+		String url = null;
 		if (facesContext != null
 				&& facesContext.getExternalContext().getRequest() != null) {
 			url = facesContext.getExternalContext().getRequest().toString();
 		} else {
-
-			try {
-				String hostname = InetAddress.getLocalHost().getHostName();
-				log.warning("Could not find facesContext. Setting url to: http://"
-						+ hostname + ":8080/decideit/");
-				url = "http://" + hostname + ":8080/decideit/";
-			} catch (UnknownHostException e) {
-				log.warning("Could not find facesContext. Setting url to: http://localhost:8080/decideit/");
-				url = "http://localhost:8080/decideit/";
+			if(config != null) {
+				url = config.getString("webAppUrl");
+			}
+			if(url == null) {
+				try {
+					String hostname = InetAddress.getLocalHost().getHostName();
+					log.warning("Could not find facesContext. Setting url to: http://"
+							+ hostname + ":8080/decideit/");
+					url = "http://" + hostname + ":8080/decideit/";
+				} catch (UnknownHostException e) {
+					log.warning("Could not find facesContext. Setting url to: http://localhost:8080/decideit/");
+					url = "http://localhost:8080/decideit/";
+				}
 			}
 		}
 		// get everything before the last /
@@ -240,7 +258,7 @@ public class DecisionManager {
 	private void sendMailTo(String subject, InternetAddress to,
 			Map<String, Object> params, String template)
 			throws MessagingException {
-		if(!params.containsKey("title")) {
+		if (!params.containsKey("title")) {
 			params.put("title", subject);
 		}
 		params.put("serverUrl", extractServerUrl());
@@ -370,46 +388,46 @@ public class DecisionManager {
 	 */
 	private String getPlainTextFromHtml(String htmlContent) {
 		String noHTMLString = "";
-        StringBuilder output = new StringBuilder();
-        try {
+		StringBuilder output = new StringBuilder();
+		try {
 
-            Document doc = Jsoup.parse(htmlContent);
-            Elements elements = doc.body().select("*");
+			Document doc = Jsoup.parse(htmlContent);
+			Elements elements = doc.body().select("*");
 
-            int countImageLinks = 0;
+			int countImageLinks = 0;
 
-            for (Element el : elements) {
-                if (el.tag().getName().equals("a")) {
-                    String linkHref = el.attr("href");
-                    String linkText = el.text();
-                    Element img = el.select("img").first();
-                    // add spaces in front and after every parenthesis ()
-                    // for making sure that mail clients create
-                    // a correct link: SEMRECSYS-1066
-                    if (img != null) {
-                        String imgAlt = "\"" + img.attr("alt") + "\"";
-                        if (imgAlt.equals("\"\""))
-                            imgAlt = "";
-                        String imgSrc = img.attr("src");
-                        countImageLinks++;
-                        output.append("Image Link " + countImageLinks + " "
-                                + linkText + "\n" + imgAlt + "\n" + "( "
-                                + imgSrc + " )\n( " + linkHref + " )\n\n");
-                    } else {
-                        output.append(linkText + " ( " + linkHref + " )\n\n");
-                    }
-                } else {
-                    output.append(el.ownText() + "\n");
-                }
-            }
-        } catch (Exception ex) {
-            log.log(Level.WARNING,
-                    "An error occurred while converting html mime content '"
-                            + htmlContent + "' to text/plain output: ", ex);
-        }
+			for (Element el : elements) {
+				if (el.tag().getName().equals("a")) {
+					String linkHref = el.attr("href");
+					String linkText = el.text();
+					Element img = el.select("img").first();
+					// add spaces in front and after every parenthesis ()
+					// for making sure that mail clients create
+					// a correct link: SEMRECSYS-1066
+					if (img != null) {
+						String imgAlt = "\"" + img.attr("alt") + "\"";
+						if (imgAlt.equals("\"\""))
+							imgAlt = "";
+						String imgSrc = img.attr("src");
+						countImageLinks++;
+						output.append("Image Link " + countImageLinks + " "
+								+ linkText + "\n" + imgAlt + "\n" + "( "
+								+ imgSrc + " )\n( " + linkHref + " )\n\n");
+					} else {
+						output.append(linkText + " ( " + linkHref + " )\n\n");
+					}
+				} else {
+					output.append(el.ownText() + "\n");
+				}
+			}
+		} catch (Exception ex) {
+			log.log(Level.WARNING,
+					"An error occurred while converting html mime content '"
+							+ htmlContent + "' to text/plain output: ", ex);
+		}
 
-        noHTMLString = output.toString();
-        return noHTMLString;
+		noHTMLString = output.toString();
+		return noHTMLString;
 	}
 
 	/**
@@ -606,19 +624,18 @@ public class DecisionManager {
 		persistedDecision.setDecisionDate(Calendar.getInstance());
 		persistedDecision.setNextReminderDate(null);
 
-		Map<String,Object> params = new HashMap<String, Object>();
+		Map<String, Object> params = new HashMap<String, Object>();
 		DecisionForm decisionForm = new DecisionForm();
 		decisionForm.setDecision(persistedDecision);
 		params.put("decisionForm", decisionForm);
-		
+
 		InternetAddress to = new InternetAddress();
 		to.setAddress(persistedDecision.getFrom());
 		// This creates problems when recreating the state
 		// it seams that the buffer gets full
-		sendMailTo(
-				persistedDecision.getStatus() + " was decided for "
-						+ persistedDecision.getWhat(), to,
-				params, "decision-email-taken");
+		sendMailTo(persistedDecision.getStatus() + " was decided for "
+				+ persistedDecision.getWhat(), to, params,
+				"decision-email-taken");
 	}
 
 	/**
