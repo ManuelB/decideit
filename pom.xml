@@ -3,7 +3,7 @@
 	<groupId>de.apaxo</groupId>
 	<artifactId>decideit</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.3</version>
 	<name>decideit Maven Webapp</name>
 	<url>https://decide.apaxo.de</url>
 	<properties>
