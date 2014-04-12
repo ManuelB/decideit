@@ -665,6 +665,7 @@ public class DecisionManager {
 	 */
 	@Timeout
 	public void sendReminder(Timer timer) {
+        timer.cancel();
 		Decision decision = em.find(Decision.class, timer.getInfo());
 		if (decision != null && decision.getNextReminderDate() != null
 				&& decision.getStatus() == DecisionStatus.Pending) {
