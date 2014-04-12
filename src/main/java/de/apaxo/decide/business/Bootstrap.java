@@ -12,6 +12,8 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import de.apaxo.decide.entities.Decision;
 import de.apaxo.decide.entities.DecisionStatus;
@@ -28,6 +30,10 @@ import de.apaxo.decide.entities.Email2Id;
 @Startup
 public class Bootstrap {
 
+    private static final Logger log = Logger
+        .getLogger(Bootstrap.class.getName());
+
+
 	@PersistenceContext
 	EntityManager em;
 	
@@ -36,8 +42,12 @@ public class Bootstrap {
 
 	@PostConstruct
 	public void bootstrap() {
-		loadDemoData();
-		rescheduleDecisions();
+        try {
+    		loadDemoData();
+		    rescheduleDecisions();
+        } catch(Exception ex) {
+            log.log(Level.WARNING, "Exception during bootstraping", ex);
+        }
 	}
 
 	/**
