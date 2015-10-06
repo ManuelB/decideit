@@ -1,4 +1,4 @@
-package de.apaxo.decide.ui.faces;
+package de.incentergy.decide.ui.faces;
 
 import java.io.CharArrayWriter;
 import java.io.IOException;

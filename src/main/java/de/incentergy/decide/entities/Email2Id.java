@@ -1,4 +1,4 @@
-package de.apaxo.decide.entities;
+package de.incentergy.decide.entities;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

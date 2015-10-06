@@ -1,4 +1,4 @@
-package de.apaxo.decide.ui;
+package de.incentergy.decide.ui;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -9,9 +9,9 @@ import javax.faces.context.FacesContext;
 import javax.inject.Inject;
 import javax.mail.MessagingException;
 
-import de.apaxo.decide.business.DecisionManager;
-import de.apaxo.decide.entities.Decision;
-import de.apaxo.decide.entities.DecisionStatus;
+import de.incentergy.decide.business.DecisionManager;
+import de.incentergy.decide.entities.Decision;
+import de.incentergy.decide.entities.DecisionStatus;
 
 @Model
 public class DecisionForm {

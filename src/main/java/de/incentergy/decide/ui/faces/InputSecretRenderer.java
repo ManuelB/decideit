@@ -1,6 +1,6 @@
-package de.apaxo.decide.ui.faces;
+package de.incentergy.decide.ui.faces;
 
-import com.sun.faces.renderkit.html_basic.TextareaRenderer;
+import com.sun.faces.renderkit.html_basic.SecretRenderer;
 import java.io.IOException;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -8,10 +8,10 @@ import javax.faces.context.ResponseWriter;
 import javax.faces.context.ResponseWriterWrapper;
 
 /**
- * A simple renderer for h:inputTextarea which allows to add some custom
+ * A simple renderer for h:inputSecret which allows to add some custom
  * attributes.
  */
-public class InputTextareaRenderer extends TextareaRenderer {
+public class InputSecretRenderer extends SecretRenderer {
 
 	private static final String[] attributes = new String[] { "placeholder" };
 
@@ -20,6 +20,7 @@ public class InputTextareaRenderer extends TextareaRenderer {
 			UIComponent component, String currentValue) throws IOException {
 		final ResponseWriter originalResponseWriter = context
 				.getResponseWriter();
+
 		context.setResponseWriter(new ResponseWriterWrapper() {
 
 			@Override
@@ -31,8 +32,8 @@ public class InputTextareaRenderer extends TextareaRenderer {
 			public void startElement(String name, UIComponent component)
 					throws IOException {
 				super.startElement(name, component);
-				System.err.println(name);
-				if ("textarea".equalsIgnoreCase(name)) {
+
+				if ("input".equalsIgnoreCase(name)) {
 					for (String attr : attributes) {
 						final String value = (String) component.getAttributes()
 								.get(attr);

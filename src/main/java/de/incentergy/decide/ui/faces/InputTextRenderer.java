@@ -1,6 +1,6 @@
-package de.apaxo.decide.ui.faces;
+package de.incentergy.decide.ui.faces;
 
-import com.sun.faces.renderkit.html_basic.SecretRenderer;
+import com.sun.faces.renderkit.html_basic.TextRenderer;
 import java.io.IOException;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -8,12 +8,14 @@ import javax.faces.context.ResponseWriter;
 import javax.faces.context.ResponseWriterWrapper;
 
 /**
- * A simple renderer for h:inputSecret which allows to add some custom
- * attributes.
+ * A simple renderer for h:inputText which allows to add some custom attributes.
+ * 
+ * http://jetcracker.wordpress.com/2012/10/30/jsf-2-overriding-renderer-how-to-add-custom-attributes-to-component/
  */
-public class InputSecretRenderer extends SecretRenderer {
+public class InputTextRenderer extends TextRenderer {
 
-	private static final String[] attributes = new String[] { "placeholder" };
+	private static final String[] attributes = new String[] { "placeholder",
+			"type" };
 
 	@Override
 	protected void getEndTextToRender(FacesContext context,

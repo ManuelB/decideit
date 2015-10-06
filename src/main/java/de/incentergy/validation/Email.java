@@ -1,4 +1,4 @@
-package de.apaxo.decide.validation;
+package de.incentergy.validation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -13,7 +13,7 @@ import javax.validation.Payload;
 /**
  * This annotation can validate an email address.
  * 
- * @author Manuel Blechchmidt <blechschmidt@apaxo.de>
+ * @author Manuel Blechchmidt <manuel.blechschmidt@incentergy.de>
  *
  */
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
@@ -21,7 +21,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = Email.EmailValidator.class)
 public @interface Email {
 
-	String message() default "{de.apaxo.decide.validation.email}";
+	String message() default "{de.incentergy.decide.validation.email}";
 
 	Class<?>[] groups() default {};
 

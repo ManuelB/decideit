@@ -1,15 +1,16 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>de.apaxo</groupId>
+	<groupId>de.incentergy</groupId>
 	<artifactId>decideit</artifactId>
 	<packaging>war</packaging>
 	<version>0.0.4-SNAPSHOT</version>
 	<name>decideit Maven Webapp</name>
-	<url>https://decide.apaxo.de</url>
+	<url>https://decide.incentergy.de</url>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -86,19 +87,19 @@
 			<version>2.0</version>
 		</dependency>
 		<dependency>
-		    <groupId>commons-configuration</groupId>
-		    <artifactId>commons-configuration</artifactId>
-		    <version>1.9</version>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.9</version>
 		</dependency>
 	</dependencies>
 	<organization>
-		<name>Apaxo GmbH</name>
-		<url>http://www.apaxo.de</url>
+		<name>Incentergy GmbH</name>
+		<url>http://www.incentergy.de</url>
 	</organization>
 	<scm>
-		<url>scm:git:https://manuel_blechschmidt@bitbucket.org/manuel_blechschmidt/decideit.git</url>
-		<connection>scm:git:https://manuel_blechschmidt@bitbucket.org/manuel_blechschmidt/decideit.git</connection>
-		<developerConnection>scm:git:https://manuel_blechschmidt@bitbucket.org/manuel_blechschmidt/decideit.git</developerConnection>
+		<url>scm:git:https://github.com/ManuelB/decideit.git</url>
+		<connection>scm:git:https://github.com/ManuelB/decideit.git</connection>
+		<developerConnection>scm:git:https://github.com/ManuelB/decideit.git</developerConnection>
 	</scm>
 	<build>
 		<finalName>decideit</finalName>
@@ -131,7 +132,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.6.3.201306030806</version>
+				<version>0.7.5.201505241946</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>

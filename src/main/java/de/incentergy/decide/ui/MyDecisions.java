@@ -1,4 +1,4 @@
-package de.apaxo.decide.ui;
+package de.incentergy.decide.ui;
 
 import java.util.List;
 import java.util.Map;
@@ -12,9 +12,9 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.FluentIterable;
 
-import de.apaxo.decide.business.DecisionManager;
-import de.apaxo.decide.entities.Decision;
-import de.apaxo.decide.entities.DecisionStatus;
+import de.incentergy.decide.business.DecisionManager;
+import de.incentergy.decide.entities.Decision;
+import de.incentergy.decide.entities.DecisionStatus;
 
 @Model
 public class MyDecisions {

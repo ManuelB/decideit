@@ -1,4 +1,4 @@
-package de.apaxo.decide.entities;
+package de.incentergy.decide.entities;
 
 public enum DecisionStatus {
 	Yes, No, Pending;

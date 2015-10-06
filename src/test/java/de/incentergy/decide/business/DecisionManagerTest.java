@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.apaxo.decide.business;
+package de.incentergy.decide.business;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -27,9 +27,10 @@ import javax.persistence.criteria.Root;
 
 import org.junit.Test;
 
-import de.apaxo.decide.entities.Decision;
-import de.apaxo.decide.entities.DecisionStatus;
-import de.apaxo.decide.entities.Email2Id;
+import de.incentergy.decide.business.DecisionManager;
+import de.incentergy.decide.entities.Decision;
+import de.incentergy.decide.entities.DecisionStatus;
+import de.incentergy.decide.entities.Email2Id;
 
 /**
  * @author manuel
@@ -39,7 +40,7 @@ public class DecisionManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link de.apaxo.decide.business.DecisionManager#processDecision(de.apaxo.decide.entities.Decision)}
+	 * {@link de.incentergy.decide.business.DecisionManager#processDecision(de.incentergy.decide.entities.Decision)}
 	 * .
 	 */
 	@SuppressWarnings("unchecked")
@@ -61,14 +62,14 @@ public class DecisionManagerTest {
 	private Decision getTestDecision() {
 		Decision decision = new Decision();
 		decision.setWhat("Do I get vacations");
-		decision.setWho("scharhag@apaxo.de");
-		decision.setFrom("blechschmidt@apaxo.de");
+		decision.setWho("boss@incentergy.de");
+		decision.setFrom("manuel.blechschmidt@incentergy.de");
 		return decision;
 	}
 
 	/**
 	 * Test method for
-	 * {@link de.apaxo.decide.business.DecisionManager#get(java.lang.String)}.
+	 * {@link de.incentergy.decide.business.DecisionManager#get(java.lang.String)}.
 	 */
 	@Test
 	public void testGet() {
@@ -80,13 +81,13 @@ public class DecisionManagerTest {
 		Decision decision = decisionManager
 				.get("8DC262E4-2812-4DA9-89F1-A64FBD281E8B");
 		assertEquals("Do I get vacations", decision.getWhat());
-		assertEquals("scharhag@apaxo.de", decision.getWho());
-		assertEquals("blechschmidt@apaxo.de", decision.getFrom());
+		assertEquals("boss@incentergy.de", decision.getWho());
+		assertEquals("manuel.blechschmidt@incentergy.de", decision.getFrom());
 	}
 
 	/**
 	 * Test method for
-	 * {@link de.apaxo.decide.business.DecisionManager#yes(de.apaxo.decide.entities.Decision)}
+	 * {@link de.incentergy.decide.business.DecisionManager#yes(de.incentergy.decide.entities.Decision)}
 	 * .
 	 * @throws MessagingException 
 	 */
@@ -106,7 +107,7 @@ public class DecisionManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link de.apaxo.decide.business.DecisionManager#no(de.apaxo.decide.entities.Decision)}
+	 * {@link de.incentergy.decide.business.DecisionManager#no(de.incentergy.decide.entities.Decision)}
 	 * .
 	 * @throws MessagingException 
 	 */
@@ -125,7 +126,7 @@ public class DecisionManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link de.apaxo.decide.business.DecisionManager#getRequestedDecisions(java.lang.String)}
+	 * {@link de.incentergy.decide.business.DecisionManager#getRequestedDecisions(java.lang.String)}
 	 * .
 	 */
 	@SuppressWarnings("unchecked")
@@ -134,7 +135,7 @@ public class DecisionManagerTest {
 		DecisionManager decisionManager = getMockedDecisionManager();
 		Email2Id email2Id = new Email2Id();
 		email2Id.setId("83024578-BFCF-4626-816D-BF533E35759C");
-		email2Id.setAddress("blechschmidt@apaxo.de");
+		email2Id.setAddress("manuel.blechschmidt@incentergy.de");
 		when(
 				decisionManager.em.find(Email2Id.class,
 						"83024578-BFCF-4626-816D-BF533E35759C")).thenReturn(
@@ -154,7 +155,7 @@ public class DecisionManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link de.apaxo.decide.business.DecisionManager#sendReminder(javax.ejb.Timer)}
+	 * {@link de.incentergy.decide.business.DecisionManager#sendReminder(javax.ejb.Timer)}
 	 * .
 	 */
 	@Test
@@ -168,7 +169,7 @@ public class DecisionManagerTest {
 	@Test
 	public void testTestConfig() {
 		DecisionManager decisionManager = getMockedDecisionManager();
-		assertEquals("https://decide-it.apaxo.de/decideit/", decisionManager.config.getString("webAppUrl"));
+		assertEquals("https://decide-it.incentergy.de/decideit/", decisionManager.config.getString("webAppUrl"));
 	}
 	
 	@Test

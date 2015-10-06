@@ -1,4 +1,4 @@
-package de.apaxo.decide.business;
+package de.incentergy.decide.business;
 
 import java.io.StringWriter;
 import java.net.InetAddress;
@@ -65,18 +65,18 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import de.apaxo.decide.entities.Decision;
-import de.apaxo.decide.entities.DecisionStatus;
-import de.apaxo.decide.entities.Decision_;
-import de.apaxo.decide.entities.Email2Id;
-import de.apaxo.decide.entities.Email2Id_;
-import de.apaxo.decide.ui.DecisionForm;
+import de.incentergy.decide.entities.Decision;
+import de.incentergy.decide.entities.DecisionStatus;
+import de.incentergy.decide.entities.Decision_;
+import de.incentergy.decide.entities.Email2Id;
+import de.incentergy.decide.entities.Email2Id_;
+import de.incentergy.decide.ui.DecisionForm;
 
 /**
  * This class implements the business logic to save a decision and send the
  * necessary reminder to the person who should take the decision.
  * 
- * @author Manuel Blechschmidt <blechschmidt@apaxo.de>
+ * @author Manuel Blechschmidt <manuel.blechschmidt@incentergy.de>
  * 
  */
 @Stateless
@@ -266,7 +266,7 @@ public class DecisionManager {
 		String htmlContent;
 		String noHTMLString;
 		MimeMessage mail = new MimeMessage(mailSession);
-		mail.addFrom(new Address[] { new InternetAddress("decide-it@apaxo.de") });
+		mail.addFrom(new Address[] { new InternetAddress("decide-it@incentergy.de") });
 		mail.addRecipient(javax.mail.Message.RecipientType.TO, to);
 		// fromMail.addRecipient(RecipientType.CC, from);
 
@@ -302,7 +302,7 @@ public class DecisionManager {
 
 		mail.setHeader("MIME-Version", "1.0");
 		mail.setHeader("Content-Type", mp.getContentType());
-		mail.setHeader("X-Mailer", "decide-it Apaxo GmbH");
+		mail.setHeader("X-Mailer", "decide-it Incentergy GmbH");
 
 		mail.setSentDate(new Date());
 

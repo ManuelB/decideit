@@ -1,8 +1,10 @@
-package de.apaxo.decide.validation;
+package de.incentergy.decide.validation;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import de.incentergy.validation.Email;
 
 public class EmailValidatorTest {
 

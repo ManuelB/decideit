@@ -9,17 +9,17 @@
             <renderer>
                 <component-family>javax.faces.Input</component-family>
                 <renderer-type>javax.faces.Text</renderer-type>
-                <renderer-class>de.apaxo.decide.ui.faces.InputTextRenderer</renderer-class>
+                <renderer-class>de.incentergy.decide.ui.faces.InputTextRenderer</renderer-class>
             </renderer>
             <renderer>
                 <component-family>javax.faces.Input</component-family>
                 <renderer-type>javax.faces.Secret</renderer-type>
-                <renderer-class>de.apaxo.decide.ui.faces.InputSecretRenderer</renderer-class>
+                <renderer-class>de.incentergy.decide.ui.faces.InputSecretRenderer</renderer-class>
             </renderer>
             <renderer>
                 <component-family>javax.faces.Input</component-family>
                 <renderer-type>javax.faces.Textarea</renderer-type>
-                <renderer-class>de.apaxo.decide.ui.faces.InputTextareaRenderer</renderer-class>
+                <renderer-class>de.incentergy.decide.ui.faces.InputTextareaRenderer</renderer-class>
             </renderer>
         </render-kit>
  

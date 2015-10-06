@@ -1,4 +1,4 @@
-package de.apaxo.decide.entities;
+package de.incentergy.decide.entities;
 
 import java.util.Calendar;
 
@@ -8,7 +8,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 
-import de.apaxo.decide.validation.Email;
+import de.incentergy.validation.Email;
 
 @Entity
 public class Decision {
