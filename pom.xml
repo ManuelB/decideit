@@ -67,7 +67,7 @@
 		<dependency>
 			<groupId>org.omnifaces</groupId>
 			<artifactId>omnifaces</artifactId>
-			<version>1.7</version> <!-- Or 1.8-SNAPSHOT -->
+			<version>1.14.2</version> <!-- Or 1.8-SNAPSHOT -->
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
